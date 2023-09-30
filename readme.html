@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prism-themes/themes/prism-material-oceanic.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TokenVerifier Documentation</title>
+
+
+    <style>
+    /* General Styles */
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+        
+        margin: 0;
+        padding: 0;
+    }
+
+    header {
+        background-color: #2e95d3;
+        
+        padding: 20px;
+        text-align: center;
+    }
+
+    h1 {
+        margin: 0;
+        font-size: 36px;
+    }
+
+    p {
+        font-size: 18px;
+    }
+
+    /* Code Styles */
+    pre {
+        background-color: #000000;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 5px;
+        overflow-x: auto;
+    }
+
+    code {
+        color: #660066;
+    }
+
+    /* Specific Code Element Colors */
+    code.comment {
+        color: #FFFFFF;
+    }
+
+    code.string {
+        color: #F01515;
+    }
+
+    code.keyword {
+        color: #2e95d3;
+    }
+
+    code.function {
+        color: #e9950c;
+    }
+
+    code.variable {
+        color: #FFFFFF;
+    }
+
+    code.number {
+        color: #d33078;
+    }
+
+    /* Add more styles as needed for other elements */
+</style>
+
+</head>
+<body>
+    <header>
+        <h1>TokenVerifier Documentation</h1>
+        <p>A JSON Web Token Verification Class</p>
+    </header>
+
+    <section id="overview">
+        <h2>Overview</h2>
+        <p>The <code>TokenVerifier</code> class provides methods for verifying and validating JWT tokens in a web application. This documentation provides a comprehensive guide on how to use this class effectively.</p>
+    </section>
+
+    <section id="quick-start">
+        <h2>Quick Start</h2>
+        <p>Here's a quick example of how to use the <code>TokenVerifier</code> class in your application:</p>
+        <pre><code class="language-javascript">
+
+                // Import dependencies and configure SECRET_KEY
+                const jwt = require('jsonwebtoken');
+                const User = require('./user-model'); // Replace with your User model
+                const SECRET_KEY = 'your-secret-key';
+
+                // Create a TokenVerifier instance
+                const tokenVerifier = new TokenVerifier();
+
+                // Define a protected route
+                app.get('/protected-route', tokenVerifier.verifyToken, (req, res) => {
+                    // Access the user and sub (subject) in req.user and req.sub
+                    res.json({ message: 'Access granted!' });
+                });
+            </code>
+        </pre>
+    </section>
+
+<section id="advanced-usage">
+    <h2>Advanced Usage</h2>
+    
+    <h3>Customizing Token Verification</h3>
+    <p>
+        The <code>TokenVerifier</code> class allows for customization of token verification by providing options to specify the expected audience and issuer. Here's how to use these options:
+    </p>
+<pre><code class="language-javascript">
+            // Customize token verification
+            const tokenVerifier = new TokenVerifier({
+                audience: 'your-audience',
+                issuer: 'your-issuer',
+            });
+
+            // Use it as middleware
+            app.get('/custom-protected-route', tokenVerifier.verifyToken, (req, res) => {
+                res.json({ message: 'Custom access granted!' });
+            });
+        </code>
+    </pre>
+
+    <h3>Extending TokenVerifier</h3>
+    <p>
+        You can extend the <code>TokenVerifier</code> class to add custom methods or override existing ones. For example, you might want to implement token refresh functionality:
+    </p>
+    <pre><code class="language-javascript">
+            class CustomTokenVerifier extends TokenVerifier {
+                constructor(options) {
+                    super(options);
+                }
+
+                async refreshToken(req, res) {
+                    // Implement your token refresh logic here
+                    // This method can be used in protected routes for token renewal
+                }
+            }
+
+            const customTokenVerifier = new CustomTokenVerifier();
+
+            // Use the custom class
+            app.get('/refresh-token', customTokenVerifier.refreshToken, (req, res) => {
+                // Handle token refresh
+                res.json({ message: 'Token refreshed!' });
+            });
+        </code>
+    </pre>
+
+    <h3>Error Handling Strategies</h3>
+    <p>
+        Depending on your application's requirements, you may want to implement different error handling strategies when token verification fails. You can customize the <code>sendErrorResponse</code> method in the <code>TokenVerifier</code> class to tailor error responses to your needs.
+    </p>
+<pre><code class="language-javascript">
+            class CustomTokenVerifier extends TokenVerifier {
+                constructor(options) {
+                    super(options);
+                }
+
+                sendErrorResponse(res, message, statusCode) {
+                    // Implement custom error response logic here
+                    // For example, you can log errors to a file or notify an admin
+                    console.error(message);
+                    return res.status(statusCode).json({ customMessage: 'Custom error message' });
+                }
+            }
+        </code>
+    </pre>
+</section>
+
+<!-- Add more sections for detailed documentation and examples -->
+
+<section id="custom-middleware">
+    <h2>Using TokenVerifier as Custom Middleware</h2>
+    <p>
+        You can create custom middleware functions using the <code>TokenVerifier</code> class to implement fine-grained access control. This section provides examples of how to use the class in various middleware scenarios.
+    </p>
+<pre><code class="language-javascript">
+            // Example: Creating middleware for admin access
+            function requireAdminAccess(req, res, next) {
+                const tokenVerifier = new TokenVerifier();
+                tokenVerifier.verifyToken(req, res, () => {
+                    if (req.user && req.user.role === 'admin') {
+                        next(); // Allow access for admins
+                    } else {
+                        res.status(403).json({ message: 'Access denied. Admin access required.' });
+                    }
+                });
+            }
+            
+            // Use the custom middleware
+            app.get('/admin-route', requireAdminAccess, (req, res) => {
+                res.json({ message: 'Admin access granted!' });
+            });
+        </code>
+    </pre>
+</section>
+
+<section id="token-refresh">
+    <h2>Token Refresh Mechanism</h2>
+    <p>
+        Implementing a token refresh mechanism is a common use case in authentication. This section explains how to use the <code>TokenVerifier</code> class to handle token refresh and renew expired tokens.
+    </p>
+<pre><code class="language-javascript">
+            // Example: Implementing token refresh
+            app.get('/refresh-token', customTokenVerifier.refreshToken, (req, res) => {
+                // Handle token refresh logic
+                res.json({ message: 'Token refreshed!' });
+            });
+        </code>
+    </pre>
+</section>
+
+<!-- Add more sections as needed -->
+
+    <footer>
+        <p>&copy; 2023 Your Company Name</p>
+    </footer>
+
+  <script>
+  Prism.highlightAll();
+</script>  
+</body>
+
+</html>
